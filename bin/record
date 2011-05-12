@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+#require 'sqlite3'
+$: << File.expand_path(File.dirname(__FILE__) + "/../lib/")
+require 'codestat'
+
+buf = ''
+while (output = STDIN.gets)
+  puts output
+  buf << output
+end
+
+p = CodeStat::Parser.new(buf)
+p.output_stats
+
+db = CodeStat::DB.new("stats.db")
+db.push(p.data)
