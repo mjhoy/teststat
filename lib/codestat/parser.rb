@@ -6,7 +6,7 @@ module CodeStat
 
     # Minitest output:
     # 1 tests, 1 assertions, 1 failures, 0 errors, 0 skips
-    TEST_REGEX = /(\d) tests?, (\d) assertions?, (\d) failures?, (\d) errors?/
+    TEST_REGEX = /[^\d](\d+) tests?, (\d+) assertions?, (\d+) failures?, (\d+) errors?/
 
     def initialize(res)
       ts = Time.now

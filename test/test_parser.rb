@@ -18,13 +18,16 @@ Test run options: --seed 25626
     FOO
     end
 
-    stat1 = CodeStat::Parser.new(output.call(:failures => 0, :errors => 0))
-    assert_equal 0, stat1.data[:failures]
-    assert_equal 0, stat1.data[:errors]
+    stat = CodeStat::Parser.new(output.call(:failures => 0, :errors => 0))
+    assert_equal 0, stat.data[:failures]
+    assert_equal 0, stat.data[:errors]
 
-    stat2 = CodeStat::Parser.new(output.call(:failures => 1, :errors => 2))
-    assert_equal 1, stat2.data[:failures]
-    assert_equal 2, stat2.data[:errors]
+    stat = CodeStat::Parser.new(output.call(:failures => 1, :errors => 2))
+    assert_equal 1, stat.data[:failures]
+    assert_equal 2, stat.data[:errors]
+    
+    stat = CodeStat::Parser.new(output.call(:failures => 10, :errors => 2))
+    assert_equal 10, stat.data[:failures]
   end
 
 end
