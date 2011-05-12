@@ -1,6 +1,6 @@
 module CodeStat
 
-  class Datum
+  class Parser
 
     attr_accessor :data
 

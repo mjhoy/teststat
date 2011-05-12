@@ -1,2 +1,2 @@
-require 'codestat/datum'
+require 'codestat/parser'
 require 'codestat/db'

@@ -1,3 +1,5 @@
+class CantReadDBError < Exception; end
+
 module CodeStat
 
   class DB
@@ -28,7 +30,5 @@ module CodeStat
     end
 
   end
-
-
 end
-class CantReadDBError < Exception; end
+
