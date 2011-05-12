@@ -1,0 +1,12 @@
+This will keep track of stats for you while you code.
+
+(Inspired by zed shaw's peepcode screencast.)
+
+Tracks:
+
+  * errors
+  * test failures
+  * times test run
+
+Writes the results of each test to some sort of DB in
+the current working directory.
