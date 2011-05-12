@@ -10,3 +10,13 @@ Tracks:
 
 Writes the results of each test to some sort of DB in
 the current working directory.
+
+pipe minitest output to `bin/record`:
+
+    ruby test/test_my_test.rb | bin/record
+
+which parses and collects the data to disk.
+
+Output statistics with
+
+    bin/stats
