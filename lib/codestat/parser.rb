@@ -8,7 +8,7 @@ module CodeStat
     # 1 tests, 1 assertions, 1 failures, 0 errors, 0 skips
     TEST_REGEX = /(\d+) tests?, (\d+) assertions?, (\d+) failures?, (\d+) errors?/
 
-    def initialize(res)
+    def initialize(res, status)
       ts = Time.now
       tests, assertions, failures, errors =
         res.match(TEST_REGEX).captures
@@ -17,7 +17,8 @@ module CodeStat
         :assertions => assertions.to_i,
         :failures => failures.to_i,
         :errors => errors.to_i,
-        :timestamp => ts
+        :timestamp => ts,
+        :exitstatus => status.exitstatus
       }
     end
 
