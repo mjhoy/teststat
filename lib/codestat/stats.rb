@@ -14,7 +14,7 @@ module CodeStat
       elsif key == :badexits
         bad_exit_stat
       else
-        d = { :sum => 0, :any => 0 }
+        d = { :sum => 0 }
         @stats.each { |s| d[:sum] += (s[key] || 0) }
         d[:mean] = d[:sum].to_f / @total_runs
         d
