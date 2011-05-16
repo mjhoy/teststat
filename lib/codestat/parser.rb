@@ -18,7 +18,7 @@ module CodeStat
         :failures => failures.to_i,
         :errors => errors.to_i,
         :timestamp => ts,
-        :exitstatus => status.exitstatus
+        :exitstatus => status.exitstatus.to_i
       }
     end
 
@@ -27,6 +27,7 @@ module CodeStat
       puts "\n"
       puts "-----"
       puts "CAPTURING TEST (stats): #{failures} failures and #{errors} errors."
+      puts "Test exited poorly." unless @data[:exitstatus] == 0
     end
 
   end
