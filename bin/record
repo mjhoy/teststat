@@ -1,16 +1,26 @@
 #!/usr/bin/env ruby
 
-#require 'sqlite3'
 $: << File.expand_path(File.dirname(__FILE__) + "/../lib/")
 require 'codestat'
 
-buf = ''
-while (output = STDIN.gets)
-  puts output
-  buf << output
-end
+cmd = ARGV.join(" ")
+fail "No test given" if cmd.empty?
 
-p = CodeStat::Parser.new(buf)
+reader, writer = IO.pipe
+pid = spawn(cmd, [ STDERR, STDOUT ] => writer)
+writer.close
+
+puts "\n[teststats] recording..."
+puts "\n"
+buf = ""
+STDOUT.flush
+while out = reader.gets
+  puts out
+  buf << out
+end
+rc, status = Process::waitpid2(pid)
+
+p = CodeStat::Parser.new(buf, status)
 p.output_stats
 
 db = CodeStat::DB.new("stats.db")
