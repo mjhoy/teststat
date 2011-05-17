@@ -34,22 +34,30 @@ class ModelTest < MiniTest::Unit::TestCase
     File.delete(@test_database)
   end
 
-  def mock_db(db)
-    CodeStat::Model.db = db
-  end
-
-  def test_schema_method
-    m = CodeStat::Model.new
-    assert_raises RuntimeError do
-      m.schema_stmt
+  class MockModel
+    def self.schema_stmt
+      "create table t1 (id integer primary key)"
+    end
+    def self.table_name
+      "t1"
     end
   end
 
-  def test_initialize_model
-    m = MiniTest::Mock.new
-    m.expect(:schema_stmt, "create table t1 (id integer primary key)", [])
+  def test_initialize_model_schema_statement
+    CodeStat::Model.initialize_model(MockModel)
+    res = nil
+    SQLite3::Database.new(@test_database) do |db|
+      res = db.execute("select * from t1")
+    end
+    assert_equal [], res
+  end
 
-    CodeStat::Model.initialize_model(m)
+  def test_dont_execute_schema_statement_if_table_exists
+    SQLite3::Database.new(@test_database) do |db|
+      res = db.execute("create table t1 (id integer primary key)")
+    end
+
+    CodeStat::Model.initialize_model(MockModel)
 
     res = nil
     SQLite3::Database.new(@test_database) do |db|

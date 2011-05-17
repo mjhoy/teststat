@@ -5,5 +5,9 @@ class ATestModel
       @schema_stmt_called = true
       "create table atestmodel (id integer primary key)"
     end
+
+    def table_name
+      "atestmodel"
+    end
   end
 end

@@ -27,9 +27,20 @@ module CodeStat
       def initialize_model(klass)
         schema_stmt = klass.schema_stmt
         raise ArgumentError unless String === schema_stmt
-        q do |db|
-          db.execute(schema_stmt)
+        unless table_exist? klass.table_name
+          q do |db|
+            db.execute(schema_stmt)
+          end
         end
+      end
+
+      def table_exist?(table_name)
+        res = []
+        q do |db|
+          res = db.execute("SELECT name FROM sqlite_master " +
+                           "WHERE type='table' AND name='#{table_name}'")
+        end
+        !res.empty?
       end
 
       def q(&block)
