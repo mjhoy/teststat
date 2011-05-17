@@ -47,13 +47,15 @@ class ModelTest < MiniTest::Unit::TestCase
 
   def test_initialize_model
     m = MiniTest::Mock.new
-    m.expect(:schema_stmt, "create table t1", [])
+    m.expect(:schema_stmt, "create table t1 (id integer primary key)", [])
 
-    db = MiniTest::Mock.new
-    db.expect(:execute, nil, ["create table t1"])
-
-    mock_db(db)
     CodeStat::Model.initialize_model(m)
+
+    res = nil
+    SQLite3::Database.new(@test_database) do |db|
+      res = db.execute("select * from t1")
+    end
+    assert_equal [], res
   end
 
 end
@@ -71,12 +73,12 @@ class ModelAutoLoadTest < MiniTest::Unit::TestCase
     File.delete(@test_database)
   end
 
-  def test_delete
+  def test_load_model_file
     CodeStat::Model.connect({
       :database => @test_database
     })
     assert File.exist?(@m_dst)
-    assert ATestModel
+    assert ATestModel.schema_stmt_called
     assert_equal [ ATestModel ], CodeStat::Model.model_classes
   end
 
