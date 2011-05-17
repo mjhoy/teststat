@@ -16,10 +16,13 @@ module CodeStat
     class << self
       attr_accessor :model_classes
       attr_accessor :db
+      attr_accessor :models_directory
 
       def connect(opts)
         @model_classes = []
         self.db = opts[:database]
+        self.models_directory = opts[:models_directory] ||
+          File.expand_path(File.dirname(__FILE__)) + '/models'
         setup_database
         load_model_classes
       end
@@ -48,7 +51,7 @@ module CodeStat
       end
 
       def load_model_classes
-        Dir[File.expand_path(File.dirname(__FILE__)) + '/models/*'].each do |model|
+        Dir[models_directory + '/*'].each do |model|
           load model
           class_name = File.basename(model).chomp('.rb').classify
           @model_classes << class_eval(class_name)
