@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# From Destroy All Software screencast #10, at:
+# http://destroyallsoftware.com/screencasts/catalog/fast-tests-with-and-without-rails
+#
+# Updated for TestUnit.
+#
+# Put this in the script/ directory of your Rails app, then run it with a test
+# filename. If the test uses test_helper, it'll be run inside Bundler.
+# Otherwise, it'll be run directly with ruby.
+
+set -e
+
+if [ $# -gt 0 ]; then # we have args
+    filename=$1
+    # Remove trailing line numbers from filename, e.g. test/my_test.rb:33
+    grep_filename=`echo $1 | sed 's/:.*$//g'`
+
+else # we have no args
+    filename='test'
+fi
+
+# Add 'test' to the load paths so test_helper is loaded.
+command="ruby -I test -rminitest/autorun"
+
+echo $command
+/Users/mjhoy/proj/ruby/test_stats/bin/record $command $filename
