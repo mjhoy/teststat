@@ -3,7 +3,7 @@ require 'codestat/model'
 require 'minitest/autorun'
 require 'fileutils'
 
-class ModelTest < MiniTest::Unit::TestCase
+class DBSetupTest < MiniTest::Unit::TestCase
 
   def setup
     @test_database = File.expand_path('./tmpdb.db')
@@ -19,6 +19,41 @@ class ModelTest < MiniTest::Unit::TestCase
     })
 
     assert File.exist? @test_database
+  end
+
+end
+
+class ModelTest < MiniTest::Unit::TestCase
+
+  def setup
+    @test_database = File.expand_path('./tmpdb.db')
+    CodeStat::Model.connect({:database => @test_database})
+  end
+
+  def teardown
+    File.delete(@test_database)
+  end
+
+  def mock_db(db)
+    CodeStat::Model.db = db
+  end
+
+  def test_schema_method
+    m = CodeStat::Model.new
+    assert_raises RuntimeError do
+      m.schema_stmt
+    end
+  end
+
+  def test_initialize_model
+    m = MiniTest::Mock.new
+    m.expect(:schema_stmt, "create table t1", [])
+
+    db = MiniTest::Mock.new
+    db.expect(:execute, nil, ["create table t1"])
+
+    mock_db(db)
+    CodeStat::Model.initialize_model(m)
   end
 
 end
