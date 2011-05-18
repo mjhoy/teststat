@@ -17,7 +17,8 @@ class DBSetupTest < MiniTest::Unit::TestCase
 
   def test_db_initialize
     CodeStat::Model.connect({
-      :database => @test_database
+      :database => @test_database,
+      :models_directory => TEST_MODELS
     })
 
     assert File.exist? @test_database
@@ -29,7 +30,10 @@ class ModelTest < MiniTest::Unit::TestCase
 
   def setup
     @test_database = File.expand_path('./tmpdb.db')
-    CodeStat::Model.connect({:database => @test_database})
+    CodeStat::Model.connect({
+      :database => @test_database,
+      :models_directory => TEST_MODELS
+    })
   end
 
   def teardown
@@ -140,6 +144,13 @@ class ModelAttributesTest < MiniTest::Unit::TestCase
       res = db.execute "select name, number from simplemodels"
     end
     assert_equal [], res
+  end
+
+  def test_doesnt_double_set_stmt_on_more_loads
+    CodeStat::Model.initialize_model(SimpleModelTest)
+    assert_equal 3, SimpleModelTest.columns.length
+    CodeStat::Model.initialize_model(SimpleModelTest)
+    assert_equal 3, SimpleModelTest.columns.length
   end
 
   def test_adds_primary_key
