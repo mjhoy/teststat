@@ -85,7 +85,6 @@ class ModelAutoLoadTest < MiniTest::Unit::TestCase
   end
 
   def test_load_model_file
-    assert_equal [], CodeStat::Model.model_classes
 
     CodeStat::Model.connect({
       :database => @test_database,
@@ -93,7 +92,7 @@ class ModelAutoLoadTest < MiniTest::Unit::TestCase
     })
 
     assert ATestModel.schema_stmt_called
-    assert_equal [ ATestModel ], CodeStat::Model.model_classes
+    assert CodeStat::Model.model_classes.include? ATestModel
   end
 
 end
