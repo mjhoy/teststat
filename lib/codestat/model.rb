@@ -8,10 +8,89 @@ class String
   end
 end
 
+class Object
+  def metaclass
+    class << self; self; end
+  end
+end
+
+module AttributeMethods
+  
+  # Define the table name associated with the model.
+  # ex:
+  #
+  # class SimpleModels < CodeStat::Model
+  #   table "simplemodels"
+  # end
+  def table(name)
+    metaclass.instance_eval do
+      define_method :table_name do
+        name
+      end
+    end
+  end
+
+  # Define the column names associated with the model attributes.
+  # ex:
+  #
+  # class SimpleModels < CodeStat::Model
+  #   table "simplemodels"
+  #
+  #   column :name, :string, :null => false
+  #   column :number, :integer, :null => false
+  # end
+  def column(name, *args)
+    define_method name do
+      instance_variable_get("@_#{name}")
+    end
+    define_method "#{name}=" do |val|
+      instance_variable_set("@_#{name}", val)
+    end
+    self.columns = columns.concat([[name].concat(args)])
+  end
+
+  def has_primary_key?
+    columns.any? do |c|
+      c[2] and c[2][:primary_key]
+    end
+  end
+
+  def columns_to_sql_list
+    unless has_primary_key?
+      self.columns = [[:id, :integer, {:primary_key => true}]].concat(columns)
+    end
+    sql = columns.map do |c|
+      opts = c[2]
+      str = c[0].to_s + " " + c[1].to_s
+      if opts
+        if opts[:primary_key]
+          str = str + " primary key"
+        end
+        if opts[:null] == false
+          str = str + " not null"
+        end
+      end
+      str
+    end.join(",")
+    sql
+  end
+
+  def schema_stmt
+    "create table #{table_name} (" + columns_to_sql_list + ")"
+  end
+end
+
 module CodeStat
   class Model
 
-    def schema_stmt; raise 'Must override.' end
+    extend AttributeMethods
+
+    def self.inherited(subclass)
+      subclass.metaclass.class_eval do
+        attr_accessor :columns
+      end
+      subclass.columns = []
+    end
 
     class << self
       attr_accessor :model_classes
@@ -68,3 +147,4 @@ module CodeStat
     end
   end
 end
+
