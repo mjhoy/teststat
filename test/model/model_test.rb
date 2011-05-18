@@ -128,8 +128,8 @@ class ModelAttributesTest < MiniTest::Unit::TestCase
 
   def test_columns_to_sql_list
     actual = SimpleModelTest.columns_to_sql_list
-    assert_equal [:id, :integer, {:primary_key => true}], SimpleModelTest.columns[0]
-    assert_equal [:name, :string, {:null => false}], SimpleModelTest.columns[1]
+    assert_equal [:id, :integer, {:primary_key => true}], SimpleModelTest.columns[2]
+    assert_equal [:name, :string, {:null => false}], SimpleModelTest.columns[0]
     assert_match /name string not null,number integer not null/, actual
   end
 
@@ -151,4 +151,84 @@ class ModelAttributesTest < MiniTest::Unit::TestCase
     assert_equal [], res
   end
 
+end
+
+class ModelFinderTest < MiniTest::Unit::TestCase
+  include DatabaseSetupAndTeardown
+
+  class User < CodeStat::Model
+    table "users"
+    column :name, :string, :null => false
+    column :number, :integer, :null => false
+  end
+
+  def test_find_id
+    CodeStat::Model.initialize_model(User)
+
+    id = nil
+    CodeStat::Model.q do |db|
+      db.execute('insert into users ( name, number ) values ( "foo", 1 )')
+      id = db.last_insert_row_id
+    end
+
+    user = User.find(id)
+    assert_equal "foo", user.name
+    assert_equal 1, user.number
+  end
+end
+
+class ModelSaveTest < MiniTest::Unit::TestCase
+  include DatabaseSetupAndTeardown
+
+  class User < CodeStat::Model
+    table "users"
+    column :name, :string, :null => false
+    column :number, :integer, :null => false
+  end
+
+  def test_new_and_save
+    CodeStat::Model.initialize_model(User)
+
+    user = User.new({
+      :name => "michael hoy",
+      :number => 2
+    })
+
+    assert_equal "michael hoy", user.name
+    assert_nil user.id
+
+    assert_equal true, user.save
+    refute_nil user.id
+
+    assert_equal User.find(user.id).name, user.name
+  end
+
+  def test_new_not_valid
+    CodeStat::Model.initialize_model(User)
+
+    user = User.new({
+      :number => 2
+    })
+    assert_equal nil, user.name
+
+    assert_raises SQLite3::ConstraintException do
+      user.save
+    end
+  end
+
+  def test_update
+    CodeStat::Model.initialize_model(User)
+
+    user = User.new({
+      :name => "michael hoy",
+      :number => 2
+    })
+    user.save
+
+    new_u = User.find(user.id)
+    new_u.name = "foobar"
+    new_u.save
+
+    assert_equal "foobar", User.find(user.id).name
+  end
 end

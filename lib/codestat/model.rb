@@ -14,6 +14,24 @@ class Object
   end
 end
 
+module FinderMethods
+
+  def find(id)
+    rec = nil
+    CodeStat::Model.q do |db|
+      rows = db.execute("select * from #{table_name} where id=#{id}")
+      rec = self.new
+      rows[0].each_key do |k|
+        if String === k
+          rec.send("#{k}=", rows[0][k])
+        end
+      end
+    end
+    rec
+  end
+
+end
+
 module AttributeMethods
   
   # Define the table name associated with the model.
@@ -57,7 +75,7 @@ module AttributeMethods
 
   def columns_to_sql_list
     unless has_primary_key?
-      self.columns = [[:id, :integer, {:primary_key => true}]].concat(columns)
+      self.column :id, :integer, :primary_key => true
     end
     sql = columns.map do |c|
       opts = c[2]
@@ -84,6 +102,42 @@ module CodeStat
   class Model
 
     extend AttributeMethods
+    extend FinderMethods
+
+    def initialize(attrs = {})
+      attrs.each_key do |k|
+        self.send("#{k}=", attrs[k])
+      end
+    end
+
+    def save
+      cols = []; vals = []
+      self.class.columns.each do |c|
+        if val = self.send("#{c[0]}")
+          cols.push c[0]
+          val = "'" + val + "'" if String === val
+          vals.push val
+        end
+      end
+      colstr = cols.join(",")
+      valstr = vals.join(",")
+      res = false
+      CodeStat::Model.q do |db|
+        if !self.id
+          sql ="insert into #{self.class.table_name} (#{colstr}) values (#{valstr});" 
+        else
+          sets = "set " + cols.map.with_index {|c, i| "#{c}=#{vals[i]}"}.join(",")
+          sql = "update #{self.class.table_name} #{sets} where id=#{self.id}"
+        end
+        db.execute(sql)
+        n = db.last_insert_row_id
+        if db.changes > 0
+          self.id = n
+          res = true
+        end
+      end
+      res
+    end
 
     def self.inherited(subclass)
       subclass.metaclass.class_eval do
@@ -126,7 +180,7 @@ module CodeStat
       end
 
       def q(&block)
-        SQLite3::Database.new(self.db, &block)
+        SQLite3::Database.new(self.db, :results_as_hash => true, &block)
       end
 
       def load_model_classes
