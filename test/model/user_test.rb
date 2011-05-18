@@ -30,5 +30,18 @@ class ModelAttributesTest < MiniTest::Unit::TestCase
     end
   end
 
+  def test_email_is_unique
+    attrs = {
+      :name => "michael hoy",
+      :email => "michael.john.hoy@gmail.com"
+    }
+    user = User.new(attrs)
+    user.save
+
+    assert_raises SQLite3::ConstraintException do
+      duplicate = User.new(attrs)
+      duplicate.save
+    end
+  end
 
 end
