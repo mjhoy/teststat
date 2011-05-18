@@ -16,10 +16,13 @@ end
 
 module FinderMethods
 
-  def find(id)
+  def find_by_attribute(col, val)
     rec = nil
+    if String === val
+      val = '"' + SQLite3::Database.quote(val) + '"'
+    end
     CodeStat::Model.q do |db|
-      rows = db.execute("select * from #{table_name} where id=#{id}")
+      rows = db.execute("select * from #{table_name} where #{col}=#{val}")
       rec = self.new
       rows[0].each_key do |k|
         if String === k
@@ -28,6 +31,10 @@ module FinderMethods
       end
     end
     rec
+  end
+
+  def find(id)
+    find_by_attribute(:id, id)
   end
 
 end

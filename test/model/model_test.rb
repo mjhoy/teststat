@@ -231,4 +231,16 @@ class ModelSaveTest < MiniTest::Unit::TestCase
 
     assert_equal "foobar", User.find(user.id).name
   end
+
+  def test_find_by_attribute
+    CodeStat::Model.initialize_model(User)
+
+    user = User.new({
+      :name => "michael hoy",
+      :number => 2
+    })
+    user.save
+
+    assert_equal user.id, User.find_by_attribute(:name, "michael hoy").id
+  end
 end
