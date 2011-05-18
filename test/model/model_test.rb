@@ -18,10 +18,11 @@ class DBSetupTest < MiniTest::Unit::TestCase
   def test_db_initialize
     CodeStat::Model.connect({
       :database => @test_database,
-      :models_directory => TEST_MODELS
+      :skip_load_models => true
     })
 
     assert File.exist? @test_database
+    assert_equal [], CodeStat::Model.model_classes
   end
 
 end
@@ -32,7 +33,7 @@ class ModelTest < MiniTest::Unit::TestCase
     @test_database = File.expand_path('./tmpdb.db')
     CodeStat::Model.connect({
       :database => @test_database,
-      :models_directory => TEST_MODELS
+      :skip_load_models => true
     })
   end
 
@@ -85,10 +86,13 @@ class ModelAutoLoadTest < MiniTest::Unit::TestCase
   end
 
   def test_load_model_file
+    assert_equal [], CodeStat::Model.model_classes
+
     CodeStat::Model.connect({
       :database => @test_database,
       :models_directory => TEST_MODELS
     })
+
     assert ATestModel.schema_stmt_called
     assert_equal [ ATestModel ], CodeStat::Model.model_classes
   end
@@ -100,7 +104,7 @@ module DatabaseSetupAndTeardown
     @test_database = File.expand_path('./tmpdb.db')
     CodeStat::Model.connect({
       :database => @test_database,
-      :models_directory => TEST_MODELS
+      :skip_load_models => true
     })
   end
 

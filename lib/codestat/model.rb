@@ -161,10 +161,12 @@ module CodeStat
       def connect(opts)
         @model_classes ||= []
         self.db = opts[:database]
-        self.models_directory = opts[:models_directory] ||
-          File.expand_path(File.dirname(__FILE__)) + '/models'
+        unless opts[:skip_load_models]
+          self.models_directory = opts[:models_directory] ||
+            File.expand_path(File.dirname(__FILE__)) + '/models'
+        end
         setup_database
-        load_model_classes
+        load_model_classes if self.models_directory
       end
 
       def initialize_model(klass)
@@ -194,7 +196,6 @@ module CodeStat
         @_loaded_modules ||= []
         Dir[models_directory + '/*'].each do |model|
           unless @_loaded_modules.include? model
-            p model
             load model
             @_loaded_modules.push model
             class_name = File.basename(model).chomp('.rb').classify
