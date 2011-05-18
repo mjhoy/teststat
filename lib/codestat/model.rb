@@ -80,6 +80,31 @@ module AttributeMethods
     end
   end
 
+  def constraints_to_sql(opts)
+    return nil unless Hash === opts
+    opts = opts.dup
+    if opts[:null] == false
+      opts[:not_null] = true
+    end
+    consts = []
+    opts.each_key do |k|
+      if opts[k]
+        str = case k
+               when :primary_key
+                 "primary key"
+               when :not_null
+                 "not null"
+               when :unique
+                 "unique"
+               else
+                 raise RuntimeError, "unknown constraint #{k}"
+               end
+        consts.push str
+      end
+    end
+    consts.join(" ")
+  end
+
   def columns_to_sql_list
     unless has_primary_key?
       self.column :id, :integer, :primary_key => true
@@ -87,14 +112,8 @@ module AttributeMethods
     sql = columns.map do |c|
       opts = c[2]
       str = c[0].to_s + " " + c[1].to_s
-      if opts
-        if opts[:primary_key]
-          str = str + " primary key"
-        end
-        if opts[:null] == false
-          str = str + " not null"
-        end
-      end
+      constraints = constraints_to_sql(opts)
+      str = str + " " + constraints if constraints
       str
     end.join(",")
     sql

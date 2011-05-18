@@ -119,7 +119,8 @@ class ModelAttributesTest < MiniTest::Unit::TestCase
   class SimpleModelTest < CodeStat::Model
     table "simplemodels"
     column :name, :string, :null => false
-    column :number, :integer, :null => false
+    column :number, :integer
+    column :email, :string, :null => false, :unique => true
   end
 
   def test_table_name_dsl
@@ -136,9 +137,10 @@ class ModelAttributesTest < MiniTest::Unit::TestCase
 
   def test_columns_to_sql_list
     actual = SimpleModelTest.columns_to_sql_list
-    assert_equal [:id, :integer, {:primary_key => true}], SimpleModelTest.columns[2]
+    assert_equal [:id, :integer, {:primary_key => true}], SimpleModelTest.columns[-1]
     assert_equal [:name, :string, {:null => false}], SimpleModelTest.columns[0]
-    assert_match /name string not null,number integer not null/, actual
+    assert_equal [:email, :string, {:null => false, :unique => true}], SimpleModelTest.columns[2]
+    assert_match /name string not null,number integer,email string unique not null/, actual
   end
 
   def test_sets_schema_stmt_accordingly
@@ -152,9 +154,9 @@ class ModelAttributesTest < MiniTest::Unit::TestCase
 
   def test_doesnt_double_set_stmt_on_more_loads
     CodeStat::Model.initialize_model(SimpleModelTest)
-    assert_equal 3, SimpleModelTest.columns.length
+    assert_equal 4, SimpleModelTest.columns.length
     CodeStat::Model.initialize_model(SimpleModelTest)
-    assert_equal 3, SimpleModelTest.columns.length
+    assert_equal 4, SimpleModelTest.columns.length
   end
 
   def test_adds_primary_key
