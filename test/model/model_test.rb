@@ -170,25 +170,25 @@ class ModelAttributesTest < MiniTest::Unit::TestCase
 
 end
 
+class TestUser < CodeStat::Model
+  table "testusers"
+  column :name, :string, :null => false
+  column :number, :integer, :null => false
+end
+
 class ModelFinderTest < MiniTest::Unit::TestCase
   include DatabaseSetupAndTeardown
 
-  class User < CodeStat::Model
-    table "users"
-    column :name, :string, :null => false
-    column :number, :integer, :null => false
-  end
-
   def test_find_id
-    CodeStat::Model.initialize_model(User)
+    CodeStat::Model.initialize_model(TestUser)
 
     id = nil
     CodeStat::Model.q do |db|
-      db.execute('insert into users ( name, number ) values ( "foo", 1 )')
+      db.execute('insert into testusers ( name, number ) values ( "foo", 1 )')
       id = db.last_insert_row_id
     end
 
-    user = User.find(id)
+    user = TestUser.find(id)
     assert_equal "foo", user.name
     assert_equal 1, user.number
   end
@@ -197,16 +197,10 @@ end
 class ModelSaveTest < MiniTest::Unit::TestCase
   include DatabaseSetupAndTeardown
 
-  class User < CodeStat::Model
-    table "users"
-    column :name, :string, :null => false
-    column :number, :integer, :null => false
-  end
-
   def test_new_and_save
-    CodeStat::Model.initialize_model(User)
+    CodeStat::Model.initialize_model(TestUser)
 
-    user = User.new({
+    user = TestUser.new({
       :name => "michael hoy",
       :number => 2
     })
@@ -217,13 +211,13 @@ class ModelSaveTest < MiniTest::Unit::TestCase
     assert_equal true, user.save
     refute_nil user.id
 
-    assert_equal User.find(user.id).name, user.name
+    assert_equal TestUser.find(user.id).name, user.name
   end
 
   def test_new_not_valid
-    CodeStat::Model.initialize_model(User)
+    CodeStat::Model.initialize_model(TestUser)
 
-    user = User.new({
+    user = TestUser.new({
       :number => 2
     })
     assert_equal nil, user.name
@@ -234,30 +228,30 @@ class ModelSaveTest < MiniTest::Unit::TestCase
   end
 
   def test_update
-    CodeStat::Model.initialize_model(User)
+    CodeStat::Model.initialize_model(TestUser)
 
-    user = User.new({
+    user = TestUser.new({
       :name => "michael hoy",
       :number => 2
     })
     user.save
 
-    new_u = User.find(user.id)
+    new_u = TestUser.find(user.id)
     new_u.name = "foobar"
     new_u.save
 
-    assert_equal "foobar", User.find(user.id).name
+    assert_equal "foobar", TestUser.find(user.id).name
   end
 
   def test_find_by_attribute
-    CodeStat::Model.initialize_model(User)
+    CodeStat::Model.initialize_model(TestUser)
 
-    user = User.new({
+    user = TestUser.new({
       :name => "michael hoy",
       :number => 2
     })
     user.save
 
-    assert_equal user.id, User.find_by_attribute(:name, "michael hoy").id
+    assert_equal user.id, TestUser.find_by_attribute(:name, "michael hoy").id
   end
 end
