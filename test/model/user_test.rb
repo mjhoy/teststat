@@ -1,7 +1,6 @@
 $: << File.expand_path(File.dirname(__FILE__) + "/../../lib/")
 require 'codestat/model'
 require 'minitest/autorun'
-require 'fileutils'
 
 module UserDatabaseSetupAndTeardown
   def setup
@@ -17,7 +16,7 @@ module UserDatabaseSetupAndTeardown
   end
 end
 
-class ModelAttributesTest < MiniTest::Unit::TestCase
+class UserTest < MiniTest::Unit::TestCase
   include UserDatabaseSetupAndTeardown
 
   def test_user_is_loaded

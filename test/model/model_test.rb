@@ -1,7 +1,6 @@
 $: << File.expand_path(File.dirname(__FILE__) + "/../../lib/")
 require 'codestat/model'
 require 'minitest/autorun'
-require 'fileutils'
 
 TEST_MODELS = File.join(File.expand_path(File.dirname(__FILE__)), 'test_models')
 
