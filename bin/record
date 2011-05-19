@@ -10,9 +10,16 @@ reader, writer = IO.pipe
 pid = spawn(cmd, [ STDERR, STDOUT ] => writer)
 writer.close
 
-puts "\n[teststats] recording..."
+puts "\n"
+job_id = %x{ git rev-list HEAD | tail -1 }.chomp("\n")
+user_id = %x{ git config --get user.email }.chomp("\n")
+
+puts "Recording for #{user_id} job #{job_id}"
 puts "\n"
 buf = ""
+
+time_started = Time.now
+
 STDOUT.flush
 while out = reader.gets
   puts out
@@ -20,8 +27,22 @@ while out = reader.gets
 end
 rc, status = Process::waitpid2(pid)
 
+time_finished = Time.now
+milliseconds = ((time_finished - time_started) * 1000).to_i
+
 p = CodeStat::Parser.new(buf, status)
 p.output_stats
 
-db = CodeStat::DB.new("stats.db")
-db.push(p.data)
+data = p.data
+
+db = CodeStat::Model.connect :database => File.expand_path("~/.teststats.db")
+test_run = TestRun.new({
+  :failures         => data[:failures],
+  :errors           => data[:errors],
+  :timestamp        => data[:timestamp].to_i,
+  :exitstatus       => data[:exitstatus],
+  :milliseconds_run => milliseconds,
+  :job_id => job_id,
+  :email  => user_id
+})
+test_run.save

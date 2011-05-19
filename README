@@ -2,21 +2,38 @@ This will keep track of stats for you while you code.
 
 (Inspired by zed shaw's peepcode screencast.)
 
-Tracks:
+---
+disclaimer: work in progress. Database will likely not 
+survive between updates, for now, as schema changes.
 
-  * errors
+Just works w/ minitest for now.
+---
+
+Tracks, for each test command:
+
   * test failures
-  * times test run
+  * test errors
+  * length in milliseconds the command ran
+  * exit status of the command
 
 Writes the results of each test to some sort of DB in
 the current working directory.
 
-Run your tests using `bin/record`:
+Run your tests by giving a minitest command to `bin/record`:
 
     bin/record ruby test/test_my_test.rb
 
-which parses and collects the data to disk.
+record runs "ruby test/test_my_test.rb" and parses the
+output, and writes to a SQLite3 database at "~/.teststats.db".
 
-Output statistics with
+Uses git:
 
-    bin/stats
+each test run is associated with:
+
+- a project, represented by the initial git commit SHA
+  of the current working directory, and
+
+- a user, represented by the output of 
+  `git config --get user.email`.
+
+

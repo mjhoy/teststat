@@ -1,3 +1,3 @@
 require 'codestat/parser'
-require 'codestat/db'
+require 'codestat/model'
 require 'codestat/stats'

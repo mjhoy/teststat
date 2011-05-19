@@ -3,7 +3,4 @@
 $: << File.expand_path(File.dirname(__FILE__) + "/../lib/")
 require 'codestat'
 
-db = CodeStat::DB.new("stats.db")
-stats = CodeStat::Stats.new(db.data)
-
-stats.output_stats
+fail "todo..."
